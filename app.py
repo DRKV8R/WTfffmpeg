@@ -1,6 +1,65 @@
-from flask import Flask
-app = Flask(__name__)
+import os
+import subprocess
+import uuid
+from flask import Flask, request, render_template, flash, redirect, url_for
+from werkzeug.utils import secure_filename
+from google.cloud import storage
 
-@app.route('/')
-def hello_world():
-    return 'Hello, World!'
+CLOUD_STORAGE_BUCKET = os.environ.get('CLOUD_STORAGE_BUCKET')
+app = Flask(__name__)
+app.secret_key = 'a_very_secret_key'
+
+@app.route('/', methods=['GET', 'POST'])
+def create_video():
+    if request.method == 'POST':
+        image_file = request.files.get('image')
+        audio_file = request.files.get('audio')
+        resolution = request.form.get('resolution')
+        if not all([image_file, audio_file, resolution]):
+            return "Missing file(s) or resolution.", 400
+        
+        job_id = str(uuid.uuid4())
+        local_temp_dir = f'/tmp/{job_id}'
+        os.makedirs(local_temp_dir, exist_ok=True)
+
+        image_filename = secure_filename(image_file.filename)
+        audio_filename = secure_filename(audio_file.filename)
+        output_filename = f'output_{os.path.splitext(image_filename)[0]}.mp4'
+
+        local_image_path = os.path.join(local_temp_dir, image_filename)
+        local_audio_path = os.path.join(local_temp_dir, audio_filename)
+        local_output_path = os.path.join(local_temp_dir, output_filename)
+
+        image_file.save(local_image_path)
+        audio_file.save(local_audio_path)
+
+        try:
+            vf_options = 'scale=1280:720'
+            if resolution == '1080p':
+                vf_options = 'scale=1920:1080'
+            
+            filter_complex = f'{vf_options}:force_original_aspect_ratio=decrease,pad={vf_options}:(ow-iw)/2:(oh-ih)/2,format=yuv420p'
+            ffmpeg_command = [
+                'ffmpeg', '-loop', '1', '-i', local_image_path, '-i', local_audio_path,
+                '-c:v', 'libx264', '-tune', 'stillimage', '-c:a', 'aac', '-b:a', '192k',
+                '-vf', filter_complex, '-shortest', local_output_path
+            ]
+            subprocess.run(ffmpeg_command, check=True)
+
+            storage_client = storage.Client()
+            bucket = storage_client.bucket(CLOUD_STORAGE_BUCKET)
+            blob = bucket.blob(f'{job_id}/{output_filename}')
+            blob.upload_from_filename(local_output_path)
+            
+            download_url = blob.generate_signed_url(version='v4', expiration=900)
+            return redirect(download_url)
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return "An error occurred during video creation.", 500
+    
+    # This will run for a GET request
+    return render_template('index.html')
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+    
