@@ -1,0 +1,52 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: wtfffmpeg
+  annotations:
+    # Ensure all requests go to the same revision for consistency
+    run.googleapis.com/ingress: all
+    run.googleapis.com/execution-environment: gen2
+spec:
+  template:
+    metadata:
+      annotations:
+        # Scale to zero for cost efficiency
+        autoscaling.knative.dev/minScale: "0"
+        autoscaling.knative.dev/maxScale: "10"
+        # Allocate more CPU and memory for FFmpeg operations
+        run.googleapis.com/cpu: "2"
+        run.googleapis.com/memory: "4Gi"
+        # Set timeout for long FFmpeg operations (max 60 minutes)
+        run.googleapis.com/timeout: "3600s"
+        # Use second generation execution environment
+        run.googleapis.com/execution-environment: gen2
+    spec:
+      containerConcurrency: 1  # Process one video at a time per instance
+      containers:
+      - image: gcr.io/PROJECT_ID/wtfffmpeg
+        ports:
+        - containerPort: 8080
+        env:
+        - name: CLOUD_STORAGE_BUCKET
+          value: "your-bucket-name"
+        - name: SECRET_KEY
+          value: "your-secret-key-change-this"
+        resources:
+          limits:
+            cpu: "2"
+            memory: "4Gi"
+        # Health checks
+        livenessProbe:
+          httpGet:
+            path: /_health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /_health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
