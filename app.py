@@ -6,19 +6,15 @@ import os
 import uuid
 
 # --- Configuration ---
-# The bucket name is passed in as an environment variable from Cloud Run
 CLOUD_STORAGE_BUCKET = os.environ.get('CLOUD_STORAGE_BUCKET')
 # --- End Configuration ---
 
 app = Flask(__name__)
-# A secret key is needed for some Flask features
 app.secret_key = 'a_very_strong_secret_key'
 
 @app.route('/', methods=['GET', 'POST'])
 def video_creator_page():
-    # This is the main function that handles the web page
     if request.method == 'POST':
-        # This block runs when the user clicks the "Create" button
         image_file = request.files.get('image')
         audio_file = request.files.get('audio')
         resolution = request.form.get('resolution')
@@ -26,7 +22,6 @@ def video_creator_page():
         if not all([image_file, audio_file, resolution]):
             return "Missing file(s) or resolution. Please go back and try again.", 400
 
-        # Create a unique temporary directory inside the Cloud Run instance
         job_id = str(uuid.uuid4())
         local_temp_dir = f'/tmp/{job_id}'
         os.makedirs(local_temp_dir, exist_ok=True)
@@ -43,7 +38,6 @@ def video_creator_page():
         audio_file.save(local_audio_path)
 
         try:
-            # --- The FFmpeg Magic ---
             vf_options = 'scale=1280:720'
             if resolution == '1080p':
                 vf_options = 'scale=1920:1080'
@@ -57,24 +51,19 @@ def video_creator_page():
             ]
             subprocess.run(ffmpeg_command, check=True)
 
-            # --- Upload the final video to Google Cloud Storage ---
             storage_client = storage.Client()
             bucket = storage_client.bucket(CLOUD_STORAGE_BUCKET)
             blob = bucket.blob(f'{job_id}/{output_filename}')
             blob.upload_from_filename(local_output_path)
             
-            # --- Create a temporary download link and send the user to it ---
-            download_url = blob.generate_signed_url(version='v4', expiration=900) # Link is valid for 15 minutes
+            download_url = blob.generate_signed_url(version='v4', expiration=900)
             return redirect(download_url)
 
         except Exception as e:
-            # This will print the error to the Cloud Run logs if something goes wrong
             print(f"An error occurred: {e}")
             return "An error occurred during video creation. Check the logs for details.", 500
 
-    # This is what users see when they first visit the page
     return render_template('index.html')
 
 if __name__ == "__main__":
-    # This part is not used by Google Cloud Run, but it's good practice to have it
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
