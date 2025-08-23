@@ -1,0 +1,29 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: wtfffmpeg
+  annotations:
+    run.googleapis.com/ingress: all
+    run.googleapis.com/execution-environment: gen2
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/maxScale: "10"
+        autoscaling.knative.dev/minScale: "0"
+        run.googleapis.com/cpu-throttling: "false"
+        run.googleapis.com/execution-environment: gen2
+    spec:
+      containerConcurrency: 1000
+      timeoutSeconds: 600
+      containers:
+      - image: gcr.io/PROJECT_ID/wtfffmpeg:latest
+        resources:
+          limits:
+            cpu: "1"
+            memory: "2Gi"
+        env:
+        - name: CLOUD_STORAGE_BUCKET
+          value: "your-bucket-name"
+        ports:
+        - containerPort: 8080

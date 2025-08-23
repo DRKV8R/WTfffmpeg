@@ -1,0 +1,21 @@
+runtime: python39
+
+# App Engine automatically scales your app based on request rate, response latency, and CPU utilization
+automatic_scaling:
+  min_instances: 0
+  max_instances: 10
+  target_cpu_utilization: 0.6
+
+# Environment variables
+env_variables:
+  # Set your Google Cloud Storage bucket name
+  CLOUD_STORAGE_BUCKET: "your-bucket-name"
+  
+# Increase the timeout for video processing
+entrypoint: gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 600 app:app
+
+# Allow larger uploads for video files
+resources:
+  cpu: 1
+  memory_gb: 2
+  disk_size_gb: 10
