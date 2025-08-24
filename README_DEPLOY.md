@@ -2,6 +2,55 @@
 
 This guide provides step-by-step instructions for deploying WTfffmpeg to Google Cloud Run, a serverless platform that scales to zero for optimal cost efficiency.
 
+## 🚀 Quick Deployment for yt-v8dr Project
+
+**For immediate deployment to the yt-v8dr project**, use these commands:
+
+```bash
+# Clone the repository
+git clone https://github.com/DRKV8R/WTfffmpeg.git
+cd WTfffmpeg
+
+# Authenticate with Google Cloud
+gcloud auth login
+gcloud config set project yt-v8dr
+
+# Deploy using the automated script
+./deploy.sh
+
+# Or deploy using Cloud Build directly
+gcloud builds submit
+```
+
+**Service Details:**
+- **Project ID**: `yt-v8dr`
+- **Service Name**: `master-v8dr` (MASTER V8DR)
+- **Storage Bucket**: `yt-v8dr-wtfffmpeg-videos`
+- **Region**: `us-central1`
+- **Service URL**: `https://master-v8dr-[hash]-uc.a.run.app`
+
+The deployment script automatically:
+- Enables required APIs
+- Creates Artifact Registry repository
+- Creates Cloud Storage bucket with lifecycle policy
+- Sets up service account with proper permissions
+- Builds and deploys the application
+- Configures public access
+
+After deployment, you can test the service:
+```bash
+# Test health endpoint
+curl https://master-v8dr-[hash]-uc.a.run.app/_health
+
+# View service status
+gcloud run services describe master-v8dr --region=us-central1
+
+# Monitor logs
+gcloud logging tail "resource.type=cloud_run_revision AND resource.labels.service_name=master-v8dr"
+```
+
+---
+
 ## Table of Contents
 
 1. [Prerequisites](#prerequisites)
