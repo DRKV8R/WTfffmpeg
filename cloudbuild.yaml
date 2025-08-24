@@ -1,0 +1,112 @@
+---
+# Cloud Build configuration for WTfffmpeg deployment
+# Project: yt-v8dr
+# Service: master-v8dr (MASTER V8DR)
+steps:
+  # Step 1: Create Artifact Registry repository if it doesn't exist
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud artifacts repositories describe wtfffmpeg-repo \
+          --repository-format=docker \
+          --location=us-central1 || \
+        gcloud artifacts repositories create wtfffmpeg-repo \
+          --repository-format=docker \
+          --location=us-central1 \
+          --description="WTfffmpeg container images for yt-v8dr project"
+
+  # Step 2: Create Cloud Storage bucket if it doesn't exist
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gsutil ls gs://yt-v8dr-wtfffmpeg-videos || \
+        (gsutil mb gs://yt-v8dr-wtfffmpeg-videos && \
+        echo '{
+          "lifecycle": {
+            "rule": [
+              {
+                "action": {"type": "Delete"},
+                "condition": {"age": 1}
+              }
+            ]
+          }
+        }' | gsutil lifecycle set /dev/stdin gs://yt-v8dr-wtfffmpeg-videos)
+
+  # Step 3: Build and push Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/yt-v8dr/wtfffmpeg-repo/wtfffmpeg:$COMMIT_SHA'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/yt-v8dr/wtfffmpeg-repo/wtfffmpeg:latest'
+      - '.'
+
+  # Step 4: Push Docker image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '--all-tags'
+      - 'us-central1-docker.pkg.dev/yt-v8dr/wtfffmpeg-repo/wtfffmpeg'
+
+  # Step 5: Create or update Cloud Run service account
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud iam service-accounts describe master-v8dr-sa@yt-v8dr.iam.gserviceaccount.com || \
+        (gcloud iam service-accounts create master-v8dr-sa \
+          --display-name="MASTER V8DR WTfffmpeg Service Account" && \
+        gcloud projects add-iam-policy-binding yt-v8dr \
+          --member="serviceAccount:master-v8dr-sa@yt-v8dr.iam.gserviceaccount.com" \
+          --role="roles/storage.objectAdmin")
+
+  # Step 6: Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'services'
+      - 'replace'
+      - 'service.yaml'
+      - '--region=us-central1'
+
+  # Step 7: Update service to use service account and set IAM policy
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud run services update master-v8dr \
+          --region=us-central1 \
+          --service-account=master-v8dr-sa@yt-v8dr.iam.gserviceaccount.com && \
+        gcloud run services add-iam-policy-binding master-v8dr \
+          --region=us-central1 \
+          --member="allUsers" \
+          --role="roles/run.invoker"
+
+# Enable required APIs automatically
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_8'
+
+# Timeout for the entire build (30 minutes should be sufficient)
+timeout: '1800s'
+
+# Specify substitutions for reusability
+substitutions:
+  _PROJECT_ID: 'yt-v8dr'
+  _REGION: 'us-central1'
+  _SERVICE_NAME: 'master-v8dr'
+  _REPOSITORY_NAME: 'wtfffmpeg-repo'
+  _BUCKET_NAME: 'yt-v8dr-wtfffmpeg-videos'
+
+# Images produced by this build
+images:
+  - 'us-central1-docker.pkg.dev/yt-v8dr/wtfffmpeg-repo/wtfffmpeg:$COMMIT_SHA'
+  - 'us-central1-docker.pkg.dev/yt-v8dr/wtfffmpeg-repo/wtfffmpeg:latest'

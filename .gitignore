@@ -53,3 +53,7 @@ Thumbs.db
 /tmp/
 *.tmp
 *.temp
+
+# Verification and build artifacts
+*.log
+verify_*.txt

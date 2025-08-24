@@ -1,7 +1,8 @@
+---
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-  name: wtfffmpeg
+  name: master-v8dr
   annotations:
     # Ensure all requests go to the same revision for consistency
     run.googleapis.com/ingress: all
@@ -23,30 +24,30 @@ spec:
     spec:
       containerConcurrency: 1  # Process one video at a time per instance
       containers:
-      - image: gcr.io/PROJECT_ID/wtfffmpeg
-        ports:
-        - containerPort: 8080
-        env:
-        - name: CLOUD_STORAGE_BUCKET
-          value: "your-bucket-name"
-        - name: SECRET_KEY
-          value: "your-secret-key-change-this"
-        resources:
-          limits:
-            cpu: "2"
-            memory: "4Gi"
-        # Health checks
-        livenessProbe:
-          httpGet:
-            path: /_health
-            port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 30
-          timeoutSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /_health
-            port: 8080
-          initialDelaySeconds: 10
-          periodSeconds: 10
-          timeoutSeconds: 5
+        - image: us-central1-docker.pkg.dev/yt-v8dr/wtfffmpeg-repo/wtfffmpeg
+          ports:
+            - containerPort: 8080
+          env:
+            - name: CLOUD_STORAGE_BUCKET
+              value: "yt-v8dr-wtfffmpeg-videos"
+            - name: SECRET_KEY
+              value: "yt-v8dr-secret-2024-production"
+          resources:
+            limits:
+              cpu: "2"
+              memory: "4Gi"
+          # Health checks
+          livenessProbe:
+            httpGet:
+              path: /_health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /_health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
