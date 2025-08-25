@@ -81,6 +81,17 @@ with app.app.test_client() as client:
     else:
         print('  ❌ Health endpoint failed')
         exit(1)
+    
+    response = client.get('/_config')
+    if response.status_code == 200:
+        config = response.get_json()
+        if config['ready_for_video_creation']:
+            print('  ✓ Configuration endpoint working and service ready')
+        else:
+            print('  ⚠️  Configuration endpoint working but service not ready')
+    else:
+        print('  ❌ Configuration endpoint failed')
+        exit(1)
 "
 
 echo ""

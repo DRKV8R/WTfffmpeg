@@ -9,8 +9,31 @@ import sys
 
 # --- Configuration ---
 CLOUD_STORAGE_BUCKET = os.environ.get('CLOUD_STORAGE_BUCKET')
-if not CLOUD_STORAGE_BUCKET:
-    logging.warning('CLOUD_STORAGE_BUCKET environment variable not set')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'a_very_strong_secret_key')
+
+# Enhanced configuration validation and logging
+def validate_configuration():
+    """Validate and log configuration status."""
+    config_issues = []
+    
+    if not CLOUD_STORAGE_BUCKET:
+        issue = 'CLOUD_STORAGE_BUCKET environment variable not set - video creation will fail'
+        config_issues.append(issue)
+        logging.warning(issue)
+    else:
+        logging.info(f'CLOUD_STORAGE_BUCKET configured: {CLOUD_STORAGE_BUCKET}')
+    
+    if SECRET_KEY == 'a_very_strong_secret_key':
+        issue = 'Using default SECRET_KEY - consider setting custom SECRET_KEY for production'
+        config_issues.append(issue)
+        logging.warning(issue)
+    else:
+        logging.info('Custom SECRET_KEY configured')
+    
+    return config_issues
+
+# Validate configuration at startup
+startup_issues = validate_configuration()
 # --- End Configuration ---
 
 # Configure logging for Cloud Run
@@ -21,12 +44,31 @@ logging.basicConfig(
 )
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'a_very_strong_secret_key')
+app.secret_key = SECRET_KEY
 
 @app.route('/_health')
 def health_check():
     """Health check endpoint for Cloud Run readiness and liveness probes."""
     return {'status': 'healthy', 'service': 'wtfffmpeg'}, 200
+
+@app.route('/_config')
+def config_check():
+    """Configuration check endpoint for troubleshooting deployment issues."""
+    config_status = {
+        'service': 'wtfffmpeg',
+        'configuration': {
+            'cloud_storage_bucket_configured': bool(CLOUD_STORAGE_BUCKET),
+            'cloud_storage_bucket_value': CLOUD_STORAGE_BUCKET if CLOUD_STORAGE_BUCKET else 'NOT_SET',
+            'secret_key_configured': bool(SECRET_KEY and SECRET_KEY != 'a_very_strong_secret_key'),
+            'secret_key_source': 'environment' if SECRET_KEY != 'a_very_strong_secret_key' else 'default',
+            'port': os.environ.get('PORT', '8080')
+        },
+        'issues': startup_issues,
+        'ready_for_video_creation': bool(CLOUD_STORAGE_BUCKET)
+    }
+    
+    status_code = 200 if config_status['ready_for_video_creation'] else 503
+    return config_status, status_code
 
 @app.route('/', methods=['GET', 'POST'])
 def video_creator_page():
@@ -42,8 +84,9 @@ def video_creator_page():
             return "Missing file(s) or resolution. Please go back and try again.", 400
 
         if not CLOUD_STORAGE_BUCKET:
-            logging.error('Cloud Storage bucket not configured')
-            return "Service configuration error. Please contact administrator.", 500
+            error_msg = 'Service configuration error: CLOUD_STORAGE_BUCKET environment variable not configured. Please contact administrator.'
+            logging.error('Cloud Storage bucket not configured - video creation request rejected')
+            return error_msg, 500
 
         job_id = str(uuid.uuid4())
         logging.info(f'Starting video creation job: {job_id}')
