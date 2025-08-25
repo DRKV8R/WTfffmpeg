@@ -306,6 +306,48 @@ The service includes a health check endpoint at `/_health`:
 curl https://YOUR_SERVICE_URL/_health
 ```
 
+### Configuration Debugging
+
+The service includes a configuration check endpoint at `/_config` for troubleshooting deployment issues:
+
+```bash
+# Check service configuration
+curl https://YOUR_SERVICE_URL/_config
+
+# Example response when properly configured:
+{
+  "service": "wtfffmpeg",
+  "configuration": {
+    "cloud_storage_bucket_configured": true,
+    "cloud_storage_bucket_value": "yt-v8dr-wtfffmpeg-videos",
+    "secret_key_configured": true,
+    "secret_key_source": "environment",
+    "port": "8080"
+  },
+  "issues": [],
+  "ready_for_video_creation": true
+}
+
+# Example response when CLOUD_STORAGE_BUCKET is missing:
+{
+  "service": "wtfffmpeg",
+  "configuration": {
+    "cloud_storage_bucket_configured": false,
+    "cloud_storage_bucket_value": "NOT_SET",
+    "secret_key_configured": false,
+    "secret_key_source": "default",
+    "port": "8080"
+  },
+  "issues": [
+    "CLOUD_STORAGE_BUCKET environment variable not set - video creation will fail",
+    "Using default SECRET_KEY - consider setting custom SECRET_KEY for production"
+  ],
+  "ready_for_video_creation": false
+}
+```
+
+**Note**: The endpoint returns HTTP 200 when properly configured, or HTTP 503 when configuration issues prevent video creation.
+
 ### Viewing Logs
 
 ```bash
@@ -321,14 +363,21 @@ gcloud logging tail "resource.type=cloud_run_revision AND resource.labels.servic
 ### Common Issues and Solutions
 
 #### 1. Service Won't Start
-**Symptoms**: Service shows "Service Unavailable"
+**Symptoms**: Service shows "Service Unavailable" or "Service configuration error"
 **Solutions**:
 - Check that `CLOUD_STORAGE_BUCKET` environment variable is set
 - Verify the bucket exists and is accessible
+- Use the configuration endpoint to diagnose issues
 - Check service logs for detailed error messages
 
 ```bash
+# Check service configuration
+curl https://YOUR_SERVICE_URL/_config
+
+# Check Cloud Run service configuration
 gcloud run services describe $SERVICE_NAME --region=$REGION
+
+# Check logs for configuration errors
 gcloud logging read "resource.type=cloud_run_revision" --limit=10
 ```
 
