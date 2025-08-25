@@ -106,11 +106,14 @@ def video_creator_page():
         audio_file.save(local_audio_path)
 
         try:
-            vf_options = 'scale=1280:720'
             if resolution == '1080p':
-                vf_options = 'scale=1920:1080'
+                scale_filter = 'scale=1920:1080'
+                pad_size = '1920:1080'
+            else:  # Default to 720p
+                scale_filter = 'scale=1280:720'
+                pad_size = '1280:720'
             
-            filter_complex = f'{vf_options}:force_original_aspect_ratio=decrease,pad={vf_options}:(ow-iw)/2:(oh-ih)/2,format=yuv420p'
+            filter_complex = f'{scale_filter}:force_original_aspect_ratio=decrease,pad={pad_size}:(ow-iw)/2:(oh-ih)/2,format=yuv420p'
 
             ffmpeg_command = [
                 'ffmpeg', '-loop', '1', '-i', local_image_path, '-i', local_audio_path,
