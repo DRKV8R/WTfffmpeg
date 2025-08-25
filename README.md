@@ -6,7 +6,8 @@ A simple web application that creates videos from static images and audio files 
 
 - **Simple Upload Interface**: Drag and drop image and audio files
 - **Multiple Resolutions**: Support for 720p and 1080p output
-- **Cloud Storage**: Videos are stored in Google Cloud Storage with temporary download links
+- **Cloud Storage**: Videos are stored in Google Cloud Storage with temporary download links (15-minute expiration)
+- **Auto-Cleanup**: Videos are automatically deleted after 24 hours for cost optimization
 - **Serverless Architecture**: Runs on Google Cloud Run, scales to zero for cost efficiency
 - **Format Support**: 
   - Images: JPEG, PNG, and other common formats
@@ -20,7 +21,9 @@ A simple web application that creates videos from static images and audio files 
 3. Upload an audio file
 4. Select your preferred resolution (720p or 1080p)
 5. Click "Create Video"
-6. Download your generated video
+6. Download your generated video immediately (link expires in 15 minutes)
+
+**📹 [Where Do My Videos Go? - Storage Guide](VIDEO_STORAGE.md)**
 
 ## Technology Stack
 

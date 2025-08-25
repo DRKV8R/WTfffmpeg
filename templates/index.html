@@ -1,21 +1,67 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Video Creator</title>
+    <title>WTfffmpeg - Video Creator</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .info-box { background: #f0f8ff; border: 1px solid #0066cc; border-radius: 5px; padding: 15px; margin: 20px 0; }
+        .warning-box { background: #fff3cd; border: 1px solid #ffc107; border-radius: 5px; padding: 15px; margin: 20px 0; }
+        form { background: #f9f9f9; padding: 20px; border-radius: 5px; }
+        input, select { margin: 5px 0; padding: 8px; }
+        input[type="submit"] { background: #0066cc; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+        input[type="submit"]:hover { background: #0052a3; }
+    </style>
 </head>
 <body>
-    <h1>Create a Video from an Image and Audio</h1>
+    <h1>🎬 WTfffmpeg - Create Videos from Images and Audio</h1>
+    
+    <div class="info-box">
+        <h3>📹 Where Do Your Videos Go?</h3>
+        <ul>
+            <li><strong>Processing:</strong> Videos are created and temporarily stored in Google Cloud Storage</li>
+            <li><strong>Download:</strong> You'll get a download link that works for <strong>15 minutes</strong></li>
+            <li><strong>Auto-Delete:</strong> Videos are automatically deleted after <strong>24 hours</strong></li>
+            <li><strong>Privacy:</strong> Only you have access to your download link</li>
+        </ul>
+    </div>
+
+    <div class="warning-box">
+        <strong>⚠️ Important:</strong> Download your video immediately after creation! 
+        The download link expires in 15 minutes and videos are deleted after 24 hours.
+    </div>
+
     <form method="post" enctype="multipart/form-data">
-        <p>Image File: <input type="file" name="image" required></p>
-        <p>Audio File: <input type="file" name="audio" required></p>
+        <h3>Create Your Video</h3>
         <p>
-            Resolution:
-            <select name="resolution" required>
-                <option value="1080p">1080p</option>
-                <option value="720p" selected>720p</option>
+            <label for="image"><strong>Image File:</strong></label><br>
+            <input type="file" name="image" id="image" accept="image/*" required>
+            <small>(JPEG, PNG, and other common formats)</small>
+        </p>
+        <p>
+            <label for="audio"><strong>Audio File:</strong></label><br>
+            <input type="file" name="audio" id="audio" accept="audio/*" required>
+            <small>(MP3, WAV, and other FFmpeg-supported formats)</small>
+        </p>
+        <p>
+            <label for="resolution"><strong>Resolution:</strong></label><br>
+            <select name="resolution" id="resolution" required>
+                <option value="1080p">1080p (1920x1080)</option>
+                <option value="720p" selected>720p (1280x720)</option>
             </select>
         </p>
-        <input type="submit" value="Create Video">
+        <input type="submit" value="🚀 Create Video">
     </form>
+
+    <div class="info-box">
+        <h3>📋 How It Works</h3>
+        <ol>
+            <li>Upload your image and audio files</li>
+            <li>Select your preferred video resolution</li>
+            <li>Click "Create Video" and wait for processing (usually &lt;1 minute)</li>
+            <li>You'll be redirected to download your MP4 video automatically</li>
+            <li>Save the video to your device before the link expires</li>
+        </ol>
+        <p><strong>Need more details?</strong> Check out our <a href="https://github.com/DRKV8R/WTfffmpeg/blob/main/VIDEO_STORAGE.md" target="_blank">Video Storage Guide</a></p>
+    </div>
 </body>
 </html>
