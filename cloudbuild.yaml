@@ -59,12 +59,14 @@ steps:
     args:
       - '-c'
       - |
-        gcloud iam service-accounts describe master-v8dr-sa@yt-v8dr.iam.gserviceaccount.com || \
+        gcloud iam service-accounts describe \
+          master-v8dr-sa@yt-v8dr.iam.gserviceaccount.com || \
         (gcloud iam service-accounts create master-v8dr-sa \
           --display-name="MASTER V8DR WTfffmpeg Service Account" && \
         gcloud projects add-iam-policy-binding yt-v8dr \
-          --member="serviceAccount:master-v8dr-sa@yt-v8dr.iam.gserviceaccount.com" \
-          --role="roles/storage.objectAdmin")
+        --member="serviceAccount:master-v8dr-sa@"'
+        '"yt-v8dr.iam.gserviceaccount.com" \
+        --role="roles/storage.objectAdmin")
 
   # Step 6: Deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
