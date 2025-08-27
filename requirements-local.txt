@@ -1,0 +1,4 @@
+# Minimal requirements for local mode (without Google Cloud)
+Flask>=3.0.0
+gunicorn>=21.0.0
+werkzeug>=3.0.0

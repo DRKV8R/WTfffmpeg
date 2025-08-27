@@ -17,17 +17,31 @@
     
     <div class="info-box">
         <h3>📹 Where Do Your Videos Go?</h3>
+        {% if local_mode %}
+        <ul>
+            <li><strong>Processing:</strong> Videos are created and stored locally on this server</li>
+            <li><strong>Download:</strong> You'll get a direct download link immediately</li>
+            <li><strong>Auto-Delete:</strong> Videos are automatically deleted after <strong>24 hours</strong></li>
+            <li><strong>Privacy:</strong> Videos are stored locally and only accessible through download links</li>
+        </ul>
+        {% else %}
         <ul>
             <li><strong>Processing:</strong> Videos are created and temporarily stored in Google Cloud Storage</li>
             <li><strong>Download:</strong> You'll get a download link that works for <strong>15 minutes</strong></li>
             <li><strong>Auto-Delete:</strong> Videos are automatically deleted after <strong>24 hours</strong></li>
             <li><strong>Privacy:</strong> Only you have access to your download link</li>
         </ul>
+        {% endif %}
     </div>
 
     <div class="warning-box">
+        {% if local_mode %}
+        <strong>📍 Local Mode:</strong> This server is running in local mode without Google Cloud. 
+        Videos are processed and stored locally on this server.
+        {% else %}
         <strong>⚠️ Important:</strong> Download your video immediately after creation! 
         The download link expires in 15 minutes and videos are deleted after 24 hours.
+        {% endif %}
     </div>
 
     <form method="post" enctype="multipart/form-data">
