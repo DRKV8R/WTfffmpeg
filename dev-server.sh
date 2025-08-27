@@ -33,6 +33,7 @@ if command -v ffmpeg >/dev/null 2>&1; then
     echo "✅ ffmpeg is available"
 else
     echo "⚠️  ffmpeg not found. Video processing may not work."
+    echo "   In Codespaces, ffmpeg will be automatically installed on first run."
 fi
 
 echo ""

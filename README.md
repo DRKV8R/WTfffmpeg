@@ -71,6 +71,13 @@ The Codespaces environment includes:
 - Pre-configured development environment variables
 - Automatic port forwarding for easy testing
 
+To verify your Codespaces environment is set up correctly, run:
+```bash
+python3 test_codespaces.py
+```
+
+📖 **[Complete Codespaces Testing Guide](CODESPACES.md)**
+
 ### Traditional Local Setup
 
 #### Prerequisites
