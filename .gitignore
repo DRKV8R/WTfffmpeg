@@ -57,3 +57,7 @@ Thumbs.db
 # Verification and build artifacts
 *.log
 verify_*.txt
+
+# Development environment
+.vscode/settings.json
+.devcontainer/.env
