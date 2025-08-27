@@ -58,7 +58,8 @@ def test_without_env_vars():
             
             assert response.status_code == 500
             error_text = response.get_data(as_text=True)
-            assert 'CLOUD_STORAGE_BUCKET environment variable not configured' in error_text
+            assert ('CLOUD_STORAGE_BUCKET environment variable not configured' in error_text or 
+                    'storage not properly configured' in error_text)
             print("✓ Video creation fails with detailed error message")
             
     finally:

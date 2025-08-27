@@ -13,15 +13,31 @@ When you create a video with WTfffmpeg, here's exactly where your videos go and 
 
 ## 📂 Where Videos Are Stored
 
-### Cloud Storage Location
+### Cloud Storage Options
+
+WTfffmpeg supports multiple storage backends:
+
+#### Google Cloud Storage (Default)
 - **Storage Service**: Google Cloud Storage
 - **Bucket**: `yt-v8dr-wtfffmpeg-videos` (for the deployed instance)
 - **File Path**: `{unique-job-id}/{video_output_filename}.mp4`
 - **Format**: MP4 with H.264 video encoding and AAC audio
 
+#### MEGA.nz Storage (Alternative)
+- **Storage Service**: MEGA.nz cloud storage
+- **Reference Folder**: https://mega.nz/folder/ZNxmCARJ#aI_69FDOlhmRuQWDriHaUw
+- **Configuration**: Set `STORAGE_TYPE=mega` environment variable
+- **Status**: Available for configuration (implementation in progress)
+
 ### Example Storage Path
 ```
+Google Cloud Storage:
 gs://yt-v8dr-wtfffmpeg-videos/
+└── a1b2c3d4-e5f6-7890-abcd-ef1234567890/
+    └── video_output_myimage.mp4
+
+MEGA.nz Storage:
+mega://folder/ZNxmCARJ/
 └── a1b2c3d4-e5f6-7890-abcd-ef1234567890/
     └── video_output_myimage.mp4
 ```

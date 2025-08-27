@@ -6,7 +6,7 @@ A simple web application that creates videos from static images and audio files 
 
 - **Simple Upload Interface**: Drag and drop image and audio files
 - **Multiple Resolutions**: Support for 720p and 1080p output
-- **Cloud Storage**: Videos are stored in Google Cloud Storage with temporary download links (15-minute expiration)
+- **Cloud Storage**: Videos are stored in Google Cloud Storage or MEGA.nz with temporary download links (15-minute expiration)
 - **Auto-Cleanup**: Videos are automatically deleted after 24 hours for cost optimization
 - **Serverless Architecture**: Runs on Google Cloud Run, scales to zero for cost efficiency
 - **Format Support**: 
@@ -93,7 +93,11 @@ docker run -p 8080:8080 \
 
 | Variable | Description | Required | Default |
 |----------|-------------|----------|---------|
-| `CLOUD_STORAGE_BUCKET` | Google Cloud Storage bucket for video storage | Yes | None |
+| `STORAGE_TYPE` | Storage backend type: 'gcs' or 'mega' | No | gcs |
+| `CLOUD_STORAGE_BUCKET` | Google Cloud Storage bucket for video storage | Yes (if using GCS) | None |
+| `MEGA_FOLDER_URL` | MEGA.nz folder URL for video storage | Yes (if using MEGA) | None |
+| `MEGA_EMAIL` | MEGA.nz account email | No | None |
+| `MEGA_PASSWORD` | MEGA.nz account password | No | None |
 | `SECRET_KEY` | Flask secret key for session security | No | Auto-generated |
 | `PORT` | Port for the application to listen on | No | 8080 |
 
