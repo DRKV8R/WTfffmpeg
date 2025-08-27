@@ -20,8 +20,6 @@ PROJECT_ID="yt-v8dr"
 REGION="us-central1"
 SERVICE_NAME="master-v8dr"
 BUCKET_NAME="yt-v8dr-wtfffmpeg-videos"
-REPOSITORY_NAME="wtfffmpeg-repo"
-SERVICE_ACCOUNT_NAME="master-v8dr-sa"
 
 echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}   WTfffmpeg Deployment Script${NC}"
@@ -93,7 +91,7 @@ echo -e "${YELLOW}This may take several minutes...${NC}"
 
 BUILD_ID=$(gcloud builds submit --config cloudbuild.yaml . --format="value(id)")
 
-if [ $? -eq 0 ]; then
+if gcloud builds submit --config cloudbuild.yaml . --format="value(id)" > /dev/null; then
     print_status "Cloud Build completed successfully!"
     print_status "Build ID: ${BUILD_ID}"
 else
