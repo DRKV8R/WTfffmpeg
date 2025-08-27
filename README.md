@@ -53,12 +53,39 @@ The application also supports deployment to Google App Engine, though Cloud Run 
 
 ## Local Development
 
-### Prerequisites
+### GitHub Codespaces (Recommended for Quick Testing)
+
+The easiest way to test WTfffmpeg is using GitHub Codespaces, which provides a pre-configured development environment with all dependencies:
+
+1. **Open in Codespaces**: Click the "Code" button on the GitHub repository and select "Codespaces"
+2. **Auto-setup**: The environment automatically installs Python dependencies and FFmpeg
+3. **Run the app**: Use the included development script:
+   ```bash
+   ./dev-server.sh
+   ```
+4. **Access the app**: VS Code will automatically forward port 8080 - just click the notification to open the app
+
+The Codespaces environment includes:
+- Python 3.11 with all dependencies pre-installed
+- FFmpeg for video processing
+- Pre-configured development environment variables
+- Automatic port forwarding for easy testing
+
+To verify your Codespaces environment is set up correctly, run:
+```bash
+python3 test_codespaces.py
+```
+
+📖 **[Complete Codespaces Testing Guide](CODESPACES.md)**
+
+### Traditional Local Setup
+
+#### Prerequisites
 - Python 3.11+
 - FFmpeg installed on your system
 - Google Cloud SDK (for cloud storage)
 
-### Setup
+#### Setup
 ```bash
 # Clone the repository
 git clone https://github.com/DRKV8R/WTfffmpeg.git
