@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WTfffmpeg - Service Configuration Error</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background-color: #f8f9fa;
+        }
+        .error-container {
+            background: #fff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .error-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .error-icon {
+            font-size: 4rem;
+            color: #dc3545;
+            margin-bottom: 15px;
+        }
+        .error-title {
+            color: #dc3545;
+            margin-bottom: 10px;
+        }
+        .error-subtitle {
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+        .error-details {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-family: monospace;
+        }
+        .troubleshooting {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .troubleshooting h3 {
+            margin-top: 0;
+            color: #0c5460;
+        }
+        .admin-section {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .admin-section h3 {
+            margin-top: 0;
+            color: #856404;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .btn:hover {
+            opacity: 0.8;
+        }
+        .code {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        .status-checks {
+            margin: 20px 0;
+        }
+        .status-item {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            background: #f8f9fa;
+        }
+        .status-icon {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .status-ok { color: #28a745; }
+        .status-error { color: #dc3545; }
+        .status-warning { color: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-header">
+            <div class="error-icon">🚫</div>
+            <h1 class="error-title">Service Configuration Error</h1>
+            <p class="error-subtitle">The video creation service is not properly configured</p>
+        </div>
+
+        <div class="error-details">
+            {{ error_message }}
+        </div>
+
+        <div class="troubleshooting">
+            <h3>🔍 What's happening?</h3>
+            <p>The WTfffmpeg service requires certain environment variables to be configured before it can create videos. This is a deployment configuration issue that needs to be resolved by an administrator.</p>
+            
+            <h4>For Users:</h4>
+            <ul>
+                <li>This is not an error with your files or request</li>
+                <li>The service administrator needs to complete the deployment configuration</li>
+                <li>Please contact your administrator or try again later</li>
+            </ul>
+        </div>
+
+        <div class="admin-section">
+            <h3>🛠️ For Administrators</h3>
+            
+            <h4>Quick Diagnostics:</h4>
+            <div class="status-checks">
+                <div class="status-item">
+                    <span class="status-icon status-ok">✓</span>
+                    <span>Service Health: <a href="/_health" target="_blank">Check health endpoint</a></span>
+                </div>
+                <div class="status-item">
+                    <span class="status-icon status-error">✗</span>
+                    <span>Configuration: <a href="/_config" target="_blank">Check configuration endpoint</a></span>
+                </div>
+            </div>
+
+            <h4>Likely Cause:</h4>
+            <p>The <code>CLOUD_STORAGE_BUCKET</code> environment variable is not set in the deployment.</p>
+
+            <h4>Solution:</h4>
+            <p>Set the required environment variable in your Cloud Run deployment:</p>
+            <div class="code">
+gcloud run services update YOUR_SERVICE_NAME \<br>
+&nbsp;&nbsp;--region=YOUR_REGION \<br>
+&nbsp;&nbsp;--set-env-vars="CLOUD_STORAGE_BUCKET=your-bucket-name"
+            </div>
+
+            <h4>Verification:</h4>
+            <p>After updating the configuration, verify the fix:</p>
+            <div class="code">
+curl https://YOUR_SERVICE_URL/_config
+            </div>
+            <p>Should return HTTP 200 with <code>"ready_for_video_creation": true</code></p>
+
+            <h4>Troubleshooting Tools:</h4>
+            <div>
+                <a href="/_config" class="btn btn-primary" target="_blank">View Configuration Status</a>
+                <a href="/_health" class="btn btn-secondary" target="_blank">Check Service Health</a>
+            </div>
+        </div>
+
+        <div class="troubleshooting">
+            <h3>📚 Additional Resources</h3>
+            <ul>
+                <li><strong>Deployment Guide:</strong> See <code>README_DEPLOY.md</code> for complete setup instructions</li>
+                <li><strong>Troubleshooting Demo:</strong> Run <code>./troubleshooting_demo.sh</code> for detailed examples</li>
+                <li><strong>Configuration Validator:</strong> Run <code>./config-validator.sh</code> to check your setup</li>
+                <li><strong>Health Monitor:</strong> Use <code>./monitor.sh</code> for continuous monitoring</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; color: #6c757d;">
+            <p>🎬 WTfffmpeg - Video Creator Service</p>
+            <p>Visit the <a href="/" style="color: #007bff;">home page</a> once configuration is complete</p>
+        </div>
+    </div>
+</body>
+</html>

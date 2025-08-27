@@ -86,7 +86,7 @@ def video_creator_page():
         if not CLOUD_STORAGE_BUCKET:
             error_msg = 'Service configuration error: CLOUD_STORAGE_BUCKET environment variable not configured. Please contact administrator.'
             logging.error('Cloud Storage bucket not configured - video creation request rejected')
-            return error_msg, 500
+            return render_template('config_error.html', error_message=error_msg), 500
 
         job_id = str(uuid.uuid4())
         logging.info(f'Starting video creation job: {job_id}')
