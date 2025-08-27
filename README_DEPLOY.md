@@ -308,6 +308,22 @@ curl https://YOUR_SERVICE_URL/_health
 
 ### Configuration Debugging
 
+The service includes comprehensive configuration debugging and testing tools:
+
+#### Quick Diagnosis
+```bash
+# Check service health and configuration
+curl https://YOUR_SERVICE_URL/_health
+curl https://YOUR_SERVICE_URL/_config
+
+# Run local configuration validation
+./config-validator.sh validate
+
+# Monitor service health
+./monitor.sh --service-url https://YOUR_SERVICE_URL check
+```
+
+#### Configuration Status Endpoint
 The service includes a configuration check endpoint at `/_config` for troubleshooting deployment issues:
 
 ```bash
@@ -347,6 +363,18 @@ curl https://YOUR_SERVICE_URL/_config
 ```
 
 **Note**: The endpoint returns HTTP 200 when properly configured, or HTTP 503 when configuration issues prevent video creation.
+
+#### Testing and Validation Tools
+
+This repository includes comprehensive testing and troubleshooting tools:
+
+- **`config-validator.sh`** - Validates environment variables, Google Cloud setup, and bucket access
+- **`monitor.sh`** - Continuous health monitoring with alerting
+- **`test_integration.py`** - Comprehensive integration test suite
+- **`test_config.py`** - Basic configuration testing
+- **GitHub Actions** - Automated CI/CD testing pipeline
+
+See [`TESTING_GUIDE.md`](TESTING_GUIDE.md) for detailed testing instructions.
 
 ### Viewing Logs
 

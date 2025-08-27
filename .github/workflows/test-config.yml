@@ -1,0 +1,151 @@
+name: Configuration Testing
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-configuration:
+    name: Test Service Configuration
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Validate Python syntax
+      run: |
+        python -m py_compile app.py
+        python -m py_compile test_config.py
+        
+    - name: Test configuration without environment variables
+      run: |
+        echo "Testing without CLOUD_STORAGE_BUCKET..."
+        unset CLOUD_STORAGE_BUCKET
+        unset SECRET_KEY
+        python test_config.py
+        
+    - name: Test configuration with environment variables
+      env:
+        CLOUD_STORAGE_BUCKET: test-bucket-name
+        SECRET_KEY: test-secret-key-2024
+      run: |
+        echo "Testing with proper environment variables..."
+        python test_config.py
+        
+    - name: Test health endpoint directly
+      run: |
+        python -c "
+        import app
+        with app.app.test_client() as client:
+            response = client.get('/_health')
+            assert response.status_code == 200
+            data = response.get_json()
+            assert data['status'] == 'healthy'
+            print('✓ Health endpoint test passed')
+        "
+        
+    - name: Test config endpoint without bucket
+      run: |
+        unset CLOUD_STORAGE_BUCKET
+        python -c "
+        import os
+        os.environ.pop('CLOUD_STORAGE_BUCKET', None)
+        import app
+        with app.app.test_client() as client:
+            response = client.get('/_config')
+            assert response.status_code == 503
+            data = response.get_json()
+            assert not data['ready_for_video_creation']
+            print('✓ Config endpoint returns 503 without bucket')
+        "
+        
+    - name: Test config endpoint with bucket
+      env:
+        CLOUD_STORAGE_BUCKET: test-bucket-name
+        SECRET_KEY: test-secret-key-2024
+      run: |
+        python -c "
+        import os
+        import importlib
+        import sys
+        # Reload app with new environment
+        if 'app' in sys.modules:
+            importlib.reload(sys.modules['app'])
+        import app
+        with app.app.test_client() as client:
+            response = client.get('/_config')
+            assert response.status_code == 200
+            data = response.get_json()
+            assert data['ready_for_video_creation']
+            print('✓ Config endpoint returns 200 with bucket')
+        "
+        
+    - name: Run verification script
+      env:
+        CLOUD_STORAGE_BUCKET: yt-v8dr-wtfffmpeg-videos
+      run: |
+        chmod +x verify.sh
+        ./verify.sh
+        
+    - name: Test troubleshooting demo
+      run: |
+        chmod +x troubleshooting_demo.sh
+        ./troubleshooting_demo.sh
+
+  test-docker-build:
+    name: Test Docker Build
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Build Docker image
+      run: |
+        docker build -t wtfffmpeg-test .
+        
+    - name: Test Docker image health
+      run: |
+        # Start container in background
+        docker run -d --name wtfffmpeg-test -p 8080:8080 wtfffmpeg-test
+        
+        # Wait for container to start
+        sleep 10
+        
+        # Test health endpoint
+        curl -f http://localhost:8080/_health || exit 1
+        
+        # Test config endpoint (should return 503 without env vars)
+        response_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/_config)
+        if [ "$response_code" != "503" ]; then
+          echo "Expected 503, got $response_code"
+          exit 1
+        fi
+        
+        # Stop container
+        docker stop wtfffmpeg-test
+        docker rm wtfffmpeg-test
