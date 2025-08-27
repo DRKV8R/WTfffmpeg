@@ -1,0 +1,20 @@
+{
+  "name": "WTfffmpeg Development",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/google-cloud-cli:1": {}
+  },
+  "postCreateCommand": "pip install -r requirements.txt && pip install flake8 yamllint black && chmod +x *.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.flake8",
+        "redhat.vscode-yaml",
+        "ms-vscode.docker"
+      ]
+    }
+  },
+  "remoteUser": "vscode"
+}

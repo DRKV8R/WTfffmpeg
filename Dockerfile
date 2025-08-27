@@ -15,7 +15,7 @@ COPY requirements.txt .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+    && pip install --no-cache-dir --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org -r requirements.txt
 
 # Copy application code
 COPY . .
@@ -33,4 +33,4 @@ EXPOSE 8080
 # - Multiple threads for I/O bound operations
 # - Timeout 0 for long-running ffmpeg operations
 # - Preload app for better performance
-CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 --preload app:app
+CMD ["gunicorn", "--bind", ":$PORT", "--workers", "1", "--threads", "8", "--timeout", "0", "--preload", "app:app"]

@@ -1,0 +1,6 @@
+# Development dependencies for WTfffmpeg
+flake8
+black
+yamllint
+pytest
+bandit

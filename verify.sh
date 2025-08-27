@@ -33,6 +33,17 @@ fi
 # Validate Python syntax
 echo ""
 echo "✅ Validating Python code..."
+
+# Check if Python dependencies are installed, install if needed
+if ! python3 -c "import flask" &> /dev/null; then
+    echo "  ⚠️  Python dependencies not found, installing..."
+    if ! python3 -m pip install --user -r requirements.txt; then
+        echo "  ❌ Failed to install Python dependencies"
+        exit 1
+    fi
+    echo "  ✓ Python dependencies installed"
+fi
+
 python3 -m py_compile app.py
 echo "  ✓ app.py syntax valid"
 
