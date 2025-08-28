@@ -2,6 +2,16 @@
 
 A simple web application that creates videos from static images and audio files using FFmpeg. Upload an image and audio file, select your desired resolution, and get a downloadable video in seconds.
 
+**NEW:** Now supports local mode without Google Cloud dependencies! 🎉
+
+## Operating Modes
+
+- **🌥️ Cloud Mode**: Uses Google Cloud Storage (original functionality)
+- **💻 Local Mode**: Runs completely locally without Google Cloud dependencies
+
+> 📖 **[Local Mode Setup Guide](README_LOCAL.md)** | 
+> 🔌 **[Chrome Extension](chrome-extension/README.md)**
+
 ## Features
 
 - **Simple Upload Interface**: Drag and drop image and audio files
@@ -16,12 +26,20 @@ A simple web application that creates videos from static images and audio files 
 
 ## Quick Start
 
+### 🌥️ Cloud Mode (Original)
 1. Visit the deployed application
 2. Upload an image file
 3. Upload an audio file
 4. Select your preferred resolution (720p or 1080p)
 5. Click "Create Video"
 6. Download your generated video immediately (link expires in 15 minutes)
+
+### 💻 Local Mode (New!)
+1. Install dependencies: `pip install -r requirements-local.txt`
+2. Ensure FFmpeg is installed: `ffmpeg -version`
+3. Run the server: `python app.py`
+4. Visit http://localhost:8080
+5. Use the web interface or [Chrome extension](chrome-extension/README.md)
 
 **📹 [Where Do My Videos Go? - Storage Guide](VIDEO_STORAGE.md)**
 
@@ -52,6 +70,29 @@ The deployment guide includes:
 The application also supports deployment to Google App Engine, though Cloud Run is recommended for better cost efficiency and performance.
 
 ## Local Development
+
+### 💻 Local Mode (No Google Cloud)
+
+For local development without Google Cloud dependencies:
+
+```bash
+# Clone the repository
+git clone https://github.com/DRKV8R/WTfffmpeg.git
+cd WTfffmpeg
+
+# Install minimal dependencies
+pip install -r requirements-local.txt
+
+# Ensure FFmpeg is installed
+ffmpeg -version
+
+# Run the application
+python app.py
+```
+
+Visit http://localhost:8080 to use the application in local mode.
+
+### 🌥️ Cloud Mode (Full Setup)
 
 ### Prerequisites
 - Python 3.11+
